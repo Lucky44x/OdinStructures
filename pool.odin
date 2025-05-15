@@ -58,8 +58,8 @@ Pops the top value inside the pool, and if empty, creates a new value and return
 pool_pop :: proc(
     self: ^Pool($T)
 ) -> (val: T, err: Error) {
-    if self == nil do return nil, PoolError.Pool_Cannot_Be_Nil
-    if !self.isInitialized do return nil, PoolError.Pool_Not_Initialized
+    if self == nil do return {}, PoolError.Pool_Cannot_Be_Nil
+    if !self.isInitialized do return {}, PoolError.Pool_Not_Initialized
 
     //If empty, push a new value (<= will propably never happen, since the pool cannot have negative count of elements, but better safe than sorry, right?)
     if self.count <= 0 do #force_inline pool_push(self, self.builder())
