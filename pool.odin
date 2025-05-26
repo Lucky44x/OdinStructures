@@ -7,6 +7,10 @@ Pool :: struct($T: typeid, $cap: int) {
     isInitialized: bool
 }
 
+/*
+TODO: FIX ALL THIS SHIT
+*/
+
 pool_init :: proc(
     self: ^Pool($T, $cap),
     startSize: int,
@@ -14,12 +18,13 @@ pool_init :: proc(
     destructor: proc(n: T)
 ) -> Error {
     if self == nil do return PoolError.Pool_Cannot_Be_Nil
-    
-    maxSize := len(self.stack.items)
+
+    init_err := stack_init(&self.stack)
+    if init_err != nil do return init_err
+
+    maxSize, err := stack_len(&self.stack)
     if maxSize <= 0 do return PoolError.Pool_Cap_Should_Be_Greater_Than_Zero
     if maxSize < startSize do return PoolError.Pool_Cap_Should_Be_Larger_Than_Initial_Allocation_Value
-
-    stack_init(&self.stack)
     
     self.builder = builder
     self.destructor = destructor
@@ -42,10 +47,11 @@ pool_push :: proc(
     if !self.isInitialized do return PoolError.Pool_Not_Initialized
 
     //If Pool is already filled to it's max, destroy the value
-    if stack_is_full(&self.stack) {
+    isStackFull, err := #force_inline stack_is_full(&self.stack)
+    if  isStackFull {
         #force_inline self.destructor(value)
         return nil
-    }
+    } 
 
     stack_push(&self.stack, value)
     return nil
@@ -61,10 +67,16 @@ pool_pop :: proc(
     if !self.isInitialized do return {}, PoolError.Pool_Not_Initialized
 
     //If empty, push a new value (<= will propably never happen, since the pool cannot have negative count of elements, but better safe than sorry, right?)
-    if self.count <= 0 do #force_inline pool_push(self, self.builder())
+    isStackEmpty, errEmpty := #force_inline stack_is_empty(&self.stack)
+    if errEmpty != nil do return {}, errEmpty
+
+    if isStackEmpty do #force_inline pool_push(self, self.builder())
 
     //Get "top" value in pool and return it
-    return stack_pop(&self.stack)
+    popVal, errPop := stack_pop(&self.stack)
+    if errPop != nil do return {}, err
+
+    return popVal, nil
 }
 
 /*
@@ -96,13 +108,12 @@ pool_destroy :: proc(
     if !self.isInitialized do return PoolError.Pool_Not_Initialized
 
     //if pool is not empty, clear it (we can ignore the returned error, since we are already handling those cases)
-    if self.count > 0 do #force_inline pool_clear(self)
+    isEmpty, _ := stack_is_empty(&self.stack)
+    if !isEmpty do #force_inline pool_clear(self)
 
-    #force_inline delete(self.values)
-    self.values = nil
     self.isInitialized = false
-    
-    return nil
+    err := stack_destroy(&self.stack)
+    return err
 }
 
 PoolError :: enum {

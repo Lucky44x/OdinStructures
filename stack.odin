@@ -113,6 +113,19 @@ stack_count :: proc(
 }
 
 /*
+Returns the length (max size) of the stack
+*/
+stack_len :: proc(
+    self: ^Stack($T, $cap),
+    loc := #caller_location
+) -> (n: int, err: Error) {
+    if self == nil do return 0, StackError.Stack_Cannot_Be_Nil
+    if !self.initialized do return 0, StackError.Stack_Not_Initialized
+
+    return cap, nil
+}
+
+/*
 Destroys the provided Stack
 */
 stack_destroy :: proc(
