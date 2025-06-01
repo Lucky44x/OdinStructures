@@ -1,3 +1,4 @@
+#+private
 package datatypes
 
 import "core:testing"
