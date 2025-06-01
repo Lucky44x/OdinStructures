@@ -36,6 +36,16 @@ run_test_pool :: proc(_: ^testing.T) {
     val, err_pop = pool_pop(&pool)
     assert(err_pop == nil, "Error while popping from pool 2:2")
     assert(val == 1, "Popped value does not match expected value 2:2")
+
+    err_clr := pool_clear(&pool)
+    assert(err_clr == nil, "Error while clearing pool")
+    
+    cnt, err_cnt := pool_size(&pool)
+    assert(err_cnt == nil, "Error while getting size of pool")
+    assert(cnt == 0, "Size of Pool is not equal to expected size 0")
+
+    err_dstr := pool_destroy(&pool)
+    assert(err_dstr == nil, "Error while destroying pool")
 }
 
 build :: proc() -> int {

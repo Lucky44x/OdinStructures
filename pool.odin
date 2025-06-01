@@ -116,6 +116,19 @@ pool_destroy :: proc(
     return err
 }
 
+/*
+Returns the count of elements inside this pool
+*/
+pool_size :: proc(
+    self: ^Pool($T, $cap)
+) -> (n: int, err: Error) {
+    if self == nil do return 0, PoolError.Pool_Cannot_Be_Nil
+    if !self.isInitialized do return 0, PoolError.Pool_Not_Initialized
+    
+    val, err_st := stack_count(&self.stack)
+    return val, err_st
+}
+
 PoolError :: enum {
     None = 0,
     Pool_Cannot_Be_Nil,
