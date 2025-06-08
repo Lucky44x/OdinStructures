@@ -6,5 +6,6 @@ Error :: union {
     RegistryError,
     PoolError,
     StackError,
+    QueueError,
     runtime.Allocator_Error
 }
