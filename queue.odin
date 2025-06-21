@@ -76,7 +76,9 @@ queue_peek :: proc(
     if self == nil do return nil, .Queue_Cannot_Be_Nil
     if !self.isInitialized do return nil, .Queue_Not_Initialized
 
-    return &self.ring[self.read]
+    if self.count == 0 do return nil, nil
+
+    return &self.ring[self.read], nil
 }
 
 queue_enqueue :: proc(
