@@ -69,6 +69,16 @@ queue_clear :: proc(
     return nil
 }
 
+queue_peek :: proc(
+    self: ^Queue($T, $cap),
+    loc := #caller_location
+) -> (val: ^T, err: Error) {
+    if self == nil do return nil, .Queue_Cannot_Be_Nil
+    if !self.isInitialized do return nil, .Queue_Not_Initialized
+
+    return &self.ring[self.read]
+}
+
 queue_enqueue :: proc(
     self: ^Queue($T, $cap),
     element: T,
