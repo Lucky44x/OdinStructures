@@ -125,7 +125,7 @@ queue_dequeue_ptr :: proc(
     
     retVal := &self.ring[self.read]
     self.read += 1
-    if self.read >= cap do self.read == 0
+    if self.read >= u32(cap) do self.read == 0
     
     self.count -= 1
 
